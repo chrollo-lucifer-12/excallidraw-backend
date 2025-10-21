@@ -1,7 +1,10 @@
 package util
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -25,4 +28,19 @@ func HashPassword(password string) (string, error) {
 func CheckPassword(hash, password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
+}
+
+func CreateToken(id string, secretKey string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
+		jwt.MapClaims{
+			"id":  id,
+			"exp": time.Now().Add(time.Hour * 24).Unix(),
+		})
+
+	tokenString, err := token.SignedString([]byte(secretKey))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
 }
