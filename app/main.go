@@ -5,6 +5,7 @@ import (
 
 	"github.com/chrollo-lucifer-12/excallidraw-backend/app/db"
 	"github.com/chrollo-lucifer-12/excallidraw-backend/app/dotenv"
+	fileupload "github.com/chrollo-lucifer-12/excallidraw-backend/app/filleupload"
 	"github.com/chrollo-lucifer-12/excallidraw-backend/app/server"
 )
 
@@ -21,9 +22,17 @@ func main() {
 	if err != nil {
 		fmt.Println("error loading db")
 	}
+	uploadServiceOpts := fileupload.UploadServiceOpts{
+		Env: env,
+	}
+	minio := fileupload.NewUploadService(uploadServiceOpts)
+	if err != nil {
+		fmt.Println("error loading minio")
+	}
 	serverOpts := server.ServerOpts{
-		Env:      env,
-		Database: database,
+		Env:          env,
+		Database:     database,
+		UploadClient: minio,
 	}
 	server := server.NewServer(serverOpts)
 	server.Start()

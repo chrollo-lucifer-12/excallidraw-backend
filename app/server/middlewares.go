@@ -15,13 +15,13 @@ func (s *Server) userMiddleware(c *gin.Context) {
 	userId, err := util.ParseToken(token, "sahil")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-		return
+		panic(err)
 	}
 
 	findUser, err := s.db.FindUserByID(userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-		return
+		panic(err)
 	}
 	if findUser == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})

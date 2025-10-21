@@ -13,6 +13,7 @@ func (s *Server) RegisterUserRoutes(r *gin.RouterGroup) {
 		user.POST("/create-profile", s.createProfileHandler)
 		user.POST("/update-profile", s.updateProfileHandler)
 		user.GET("/me", s.getUserProfileHandler)
+		user.POST("/upload-avatar", s.uploadAvatarHandler)
 	}
 }
 
@@ -163,4 +164,25 @@ func (s *Server) getUserProfileHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusFound, gin.H{"message": "Profile found", "user": userProfile})
+}
+
+func (s *Server) uploadAvatarHandler(c *gin.Context) {
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No file is received"})
+		return
+	}
+	src, err := file.Open()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot open file"})
+		panic(err)
+	}
+	defer src.Close()
+	err = s.uploadClient.UploadFile("avatars", file.Filename, file.Size, src)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error uploading file"})
+		panic(err)
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "File uplaoded"})
 }

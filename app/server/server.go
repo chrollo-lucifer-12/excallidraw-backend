@@ -6,24 +6,28 @@ import (
 
 	"github.com/chrollo-lucifer-12/excallidraw-backend/app/db"
 	"github.com/chrollo-lucifer-12/excallidraw-backend/app/dotenv"
+	fileupload "github.com/chrollo-lucifer-12/excallidraw-backend/app/filleupload"
 	"github.com/gin-gonic/gin"
 )
 
 type ServerOpts struct {
-	Env      *dotenv.Env
-	Database *db.DB
+	Env          *dotenv.Env
+	Database     *db.DB
+	UploadClient *fileupload.UploadService
 }
 
 type Server struct {
-	env    *dotenv.Env
-	db     *db.DB
-	router *gin.Engine
+	env          *dotenv.Env
+	db           *db.DB
+	router       *gin.Engine
+	uploadClient *fileupload.UploadService
 }
 
 func NewServer(opts ServerOpts) *Server {
 	server := &Server{
-		env: opts.Env,
-		db:  opts.Database,
+		env:          opts.Env,
+		db:           opts.Database,
+		uploadClient: opts.UploadClient,
 	}
 	server.router = gin.Default()
 	return server
