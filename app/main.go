@@ -5,6 +5,7 @@ import (
 
 	"github.com/chrollo-lucifer-12/excallidraw-backend/app/db"
 	"github.com/chrollo-lucifer-12/excallidraw-backend/app/dotenv"
+	"github.com/chrollo-lucifer-12/excallidraw-backend/app/server"
 )
 
 func main() {
@@ -16,9 +17,14 @@ func main() {
 	dbOpts := db.DBOpts{
 		Env: env,
 	}
-	_, err = db.NewDB(dbOpts)
+	database, err := db.NewDB(dbOpts)
 	if err != nil {
 		fmt.Println("error loading db")
 	}
-
+	serverOpts := server.ServerOpts{
+		Env:      env,
+		Database: database,
+	}
+	server := server.NewServer(serverOpts)
+	server.Start()
 }

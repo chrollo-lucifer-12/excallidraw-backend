@@ -8,6 +8,7 @@ import (
 
 type Env struct {
 	DATABASE_URL string
+	PORT         string
 }
 
 func NewEnv() (*Env, error) {
@@ -15,9 +16,10 @@ func NewEnv() (*Env, error) {
 	if err != nil {
 		return nil, err
 	}
+	port := os.Getenv("PORT")
 	databaseUrl := os.Getenv("DATABASE_URL")
 	env := Env{}
 	env.DATABASE_URL = databaseUrl
-
+	env.PORT = port
 	return &env, nil
 }
