@@ -14,6 +14,7 @@ func (s *Server) RegisterUserRoutes(r *gin.RouterGroup) {
 		user.POST("/update-profile", s.updateProfileHandler)
 		user.GET("/me", s.getUserProfileHandler)
 		user.POST("/upload-avatar", s.uploadAvatarHandler)
+		user.GET("/whiteboards", s.getWhiteboardsHandler)
 	}
 }
 
@@ -185,4 +186,23 @@ func (s *Server) uploadAvatarHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "File uplaoded"})
+}
+
+func (s *Server) getWhiteboardsHandler(c *gin.Context) {
+	user_id, ok := c.Get("user_id")
+	if !ok {
+		return
+	}
+
+	user_id_uuid, err := util.ParseUUID(user_id.(string))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		panic(err)
+	}
+	whiteboards, err := s.db.GetWhiteboardsByAdminID(user_id_uuid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		panic(err)
+	}
+	c.JSON(http.StatusFound, gin.H{"whiteboards": whiteboards})
 }

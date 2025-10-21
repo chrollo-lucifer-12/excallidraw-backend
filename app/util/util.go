@@ -1,6 +1,8 @@
 package util
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"time"
 
@@ -79,4 +81,13 @@ func ParseTime(timeStr string) (time.Time, error) {
 	layout := "2006-01-02"
 	date_time, err := time.Parse(layout, timeStr)
 	return date_time, err
+}
+
+func GenerateRandomSlug(n int) (string, error) {
+	bytes := make([]byte, n)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
 }

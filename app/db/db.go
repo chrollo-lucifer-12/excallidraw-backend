@@ -133,3 +133,30 @@ func (d *DB) UpdateUserProfile(profile *UserData) error {
 
 	return nil
 }
+
+func (d *DB) CreateWhiteboard(admin_id uuid.UUID, name string, slug string) error {
+	whiteboard := Whiteboard{
+		Name:    name,
+		AdminID: admin_id,
+		Slug:    slug,
+		Users: []User{
+			{ID: admin_id},
+		},
+	}
+
+	if err := d.Database.Create(&whiteboard).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *DB) GetWhiteboardsByAdminID(admin_id uuid.UUID) ([]Whiteboard, error) {
+	var whiteboards []Whiteboard
+	if err := d.Database.Where("admin_id = ?", admin_id).Find(&whiteboards).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return whiteboards, nil
+}
