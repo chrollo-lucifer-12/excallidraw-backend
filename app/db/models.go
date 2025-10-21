@@ -20,6 +20,7 @@ type UserData struct {
 	UserID    uuid.UUID `gorm:"type:uuid;not null;uniqueIndex"`
 	BirthDate time.Time
 	AvatarUrl string
+	Fullname  string    `gorm:"not null"`
 	Username  string    `gorm:"uniqueIndex;size:20;not null"`
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`

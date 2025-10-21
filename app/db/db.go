@@ -1,6 +1,7 @@
 package db
 
 import (
+	"errors"
 	"log"
 	"os"
 	"time"
@@ -46,4 +47,26 @@ func NewDB(opts DBOpts) (*DB, error) {
 	return &DB{
 		Database: db,
 	}, nil
+}
+
+func (d *DB) FindUser(email string) (*User, error) {
+	var user User
+	if err := d.Database.Where("email = ?", email).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (d *DB) CreateUser(email string, password string) error {
+	user := User{
+		Email:    email,
+		Password: password,
+	}
+	if err := d.Database.Create(&user).Error; err != nil {
+		return err
+	}
+	return nil
 }

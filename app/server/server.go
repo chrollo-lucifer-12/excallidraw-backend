@@ -30,6 +30,7 @@ func NewServer(opts ServerOpts) *Server {
 }
 
 func (s *Server) Start() {
+	s.RegisterRoutes(s.router)
 	port := "8080"
 	if s.env.PORT != "" {
 		port = s.env.PORT
