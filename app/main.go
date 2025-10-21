@@ -13,21 +13,21 @@ func main() {
 	var err error
 	env, err := dotenv.NewEnv()
 	if err != nil {
-		fmt.Println("error loading env")
+		fmt.Println("error loading env", err)
 	}
 	dbOpts := db.DBOpts{
 		Env: env,
 	}
 	database, err := db.NewDB(dbOpts)
 	if err != nil {
-		fmt.Println("error loading db")
+		fmt.Println("error loading db", err)
 	}
 	uploadServiceOpts := fileupload.UploadServiceOpts{
 		Env: env,
 	}
 	minio := fileupload.NewUploadService(uploadServiceOpts)
 	if err != nil {
-		fmt.Println("error loading minio")
+		fmt.Println("error loading minio", err)
 	}
 	serverOpts := server.ServerOpts{
 		Env:          env,
