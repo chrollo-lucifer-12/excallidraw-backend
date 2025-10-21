@@ -39,6 +39,10 @@ func NewDB(opts DBOpts) (*DB, error) {
 		return nil, err
 	}
 
+	if err := db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`).Error; err != nil {
+		log.Fatalf("failed to enable uuid-ossp: %v", err)
+	}
+
 	err = db.AutoMigrate(&User{}, &UserData{}, &Whiteboard{}, &WhiteboardElement{})
 	if err != nil {
 		log.Fatalf("Failed to migrate database :%v\n", err)
