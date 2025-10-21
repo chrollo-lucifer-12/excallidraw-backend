@@ -15,10 +15,8 @@ type Env struct {
 }
 
 func NewEnv() (*Env, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return nil, err
-	}
+	_ = godotenv.Load()
+
 	port := os.Getenv("PORT")
 	databaseUrl := os.Getenv("DATABASE_URL")
 	minio_endpoint := os.Getenv("MINIO_ENDPOINT")
