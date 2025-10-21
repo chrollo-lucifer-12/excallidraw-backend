@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	ID          uuid.UUID    `gorm:"type:uuid;primaryKey"`
+	ID          uuid.UUID    `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
 	Email       string       `gorm:"uniqueIndex;size:100;not null"`
 	Password    string       `gorm:"not null"`
 	CreatedAt   time.Time    `gorm:"autoCreateTime"`
@@ -16,7 +16,7 @@ type User struct {
 }
 
 type UserData struct {
-	ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
+	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
 	UserID    uuid.UUID `gorm:"type:uuid;not null;uniqueIndex"`
 	BirthDate time.Time
 	AvatarUrl string
@@ -27,7 +27,7 @@ type UserData struct {
 }
 
 type Whiteboard struct {
-	ID      uuid.UUID `gorm:"type:uuid;primaryKey"`
+	ID      uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
 	Name    string    `gorm:"size:50;not null"`
 	Slug    string    `gorm:"size:10;uniqueIndex"`
 	AdminID uuid.UUID `gorm:"type:uuid;not null"`
@@ -38,7 +38,7 @@ type Whiteboard struct {
 }
 
 type WhiteboardElement struct {
-	ID           uuid.UUID `gorm:"type:uuid;primaryKey"`
+	ID           uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
 	WhiteboardID uuid.UUID `gorm:"type:uuid;not null;index"`
 	Type         string
 	Data         string

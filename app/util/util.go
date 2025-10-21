@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -67,4 +68,15 @@ func ParseToken(tokenStr string, secretKey string) (string, error) {
 	}
 
 	return "", fmt.Errorf("invalid token")
+}
+
+func ParseUUID(user_id string) (uuid.UUID, error) {
+	user_id_uuid, err := uuid.Parse(user_id)
+	return user_id_uuid, err
+}
+
+func ParseTime(timeStr string) (time.Time, error) {
+	layout := "2006-01-02"
+	date_time, err := time.Parse(layout, timeStr)
+	return date_time, err
 }

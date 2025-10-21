@@ -96,6 +96,20 @@ func (d *DB) CreateUser(email string, password string) error {
 	return nil
 }
 
+func (d *DB) GetUserProfile(user_id uuid.UUID) (*UserData, error) {
+	userProfile := UserData{
+		UserID: user_id,
+	}
+
+	if err := d.Database.Where("user_id = ?", user_id).First(&userProfile).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &userProfile, nil
+}
+
 func (d *DB) CreateUserProfile(birthDate time.Time, avatarUrl string, fullname, username string, user_id uuid.UUID) error {
 	userProfile := UserData{
 		UserID:    user_id,
@@ -107,5 +121,15 @@ func (d *DB) CreateUserProfile(birthDate time.Time, avatarUrl string, fullname, 
 	if err := d.Database.Create(&userProfile).Error; err != nil {
 		return err
 	}
+	return nil
+}
+
+func (d *DB) UpdateUserProfile(profile *UserData) error {
+	if err := d.Database.Model(&UserData{}).
+		Where("user_id = ?", profile.UserID).
+		Updates(profile).Error; err != nil {
+		return err
+	}
+
 	return nil
 }
