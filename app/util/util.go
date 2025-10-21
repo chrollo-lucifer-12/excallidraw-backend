@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -43,4 +44,27 @@ func CreateToken(id string, secretKey string) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func ParseToken(tokenStr string, secretKey string) (string, error) {
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(secretKey), nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		if id, ok := claims["id"].(string); ok {
+			return id, nil
+		} else {
+			return "", fmt.Errorf("id claim not found or invalid")
+		}
+	}
+
+	return "", fmt.Errorf("invalid token")
 }

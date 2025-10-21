@@ -35,7 +35,7 @@ func (s *Server) loginHandler(c *gin.Context) {
 	email := req.Email
 	password := req.Password
 
-	findUser, err := s.db.FindUser(email)
+	findUser, err := s.db.FindUserByEmail(email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 		panic(err)
@@ -70,7 +70,7 @@ func (s *Server) singupHandler(c *gin.Context) {
 	email := req.Email
 	password := req.Password
 
-	findUser, err := s.db.FindUser(email)
+	findUser, err := s.db.FindUserByEmail(email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 		return

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/chrollo-lucifer-12/excallidraw-backend/app/dotenv"
+	"github.com/google/uuid"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -49,7 +50,18 @@ func NewDB(opts DBOpts) (*DB, error) {
 	}, nil
 }
 
-func (d *DB) FindUser(email string) (*User, error) {
+func (d *DB) FindUserByID(id string) (*User, error) {
+	var user User
+	if err := d.Database.Where("id = ?", id).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (d *DB) FindUserByEmail(email string) (*User, error) {
 	var user User
 	if err := d.Database.Where("email = ?", email).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -60,12 +72,39 @@ func (d *DB) FindUser(email string) (*User, error) {
 	return &user, nil
 }
 
+func (d *DB) FindUserByUsername(username string) (*UserData, error) {
+	userProfile := UserData{
+		Username: username,
+	}
+	if err := d.Database.Where("username = ?", username).First(&userProfile).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &userProfile, nil
+}
+
 func (d *DB) CreateUser(email string, password string) error {
 	user := User{
 		Email:    email,
 		Password: password,
 	}
 	if err := d.Database.Create(&user).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *DB) CreateUserProfile(birthDate time.Time, avatarUrl string, fullname, username string, user_id uuid.UUID) error {
+	userProfile := UserData{
+		UserID:    user_id,
+		BirthDate: birthDate,
+		AvatarUrl: avatarUrl,
+		Fullname:  fullname,
+		Username:  username,
+	}
+	if err := d.Database.Create(&userProfile).Error; err != nil {
 		return err
 	}
 	return nil
