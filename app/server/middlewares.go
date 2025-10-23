@@ -4,29 +4,26 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/chrollo-lucifer-12/excallidraw-backend/app/util"
 	"github.com/gin-gonic/gin"
 )
 
 func (s *Server) userMiddleware(c *gin.Context) {
 	bearerToken := c.GetHeader("Authorization")
-	token := strings.Split(bearerToken, " ")[1]
-
-	userId, err := util.ParseToken(token, "sahil")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-		panic(err)
-	}
-
-	findUser, err := s.db.FindUserByID(userId)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-		panic(err)
-	}
-	if findUser == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	parts := strings.Split(bearerToken, " ")
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid or missing token"})
+		c.Abort()
 		return
 	}
-	c.Set("user_id", userId)
+	token := parts[1]
+
+	userID, err := s.db.ValidateSessionToken(token)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid or expired token"})
+		c.Abort()
+		return
+	}
+
+	c.Set("user_id", userID.String())
 	c.Next()
 }

@@ -204,5 +204,5 @@ func (s *Server) getWhiteboardsHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		panic(err)
 	}
-	c.JSON(http.StatusFound, gin.H{"whiteboards": whiteboards})
+	c.JSON(http.StatusOK, gin.H{"whiteboards": whiteboards})
 }

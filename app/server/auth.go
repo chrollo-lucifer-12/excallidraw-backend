@@ -21,7 +21,7 @@ func (s *Server) RegisterAuthRoutes(r *gin.RouterGroup) {
 	auth := r.Group("/auth")
 	{
 		auth.POST("/login", s.loginHandler)
-		auth.POST("/singup", s.singupHandler)
+		auth.POST("/signup", s.singupHandler)
 	}
 }
 
@@ -52,7 +52,7 @@ func (s *Server) loginHandler(c *gin.Context) {
 		return
 	}
 
-	token, err := util.CreateToken(findUser.ID.String(), "sahil")
+	token, err := s.db.CreateSession(findUser.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 		panic(err)

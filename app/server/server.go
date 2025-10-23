@@ -3,10 +3,12 @@ package server
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/chrollo-lucifer-12/excallidraw-backend/app/db"
 	"github.com/chrollo-lucifer-12/excallidraw-backend/app/dotenv"
 	fileupload "github.com/chrollo-lucifer-12/excallidraw-backend/app/filleupload"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,6 +36,16 @@ func NewServer(opts ServerOpts) *Server {
 }
 
 func (s *Server) Start() {
+
+	s.router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	s.RegisterRoutes(s.router)
 	port := "8080"
 	if s.env.PORT != "" {

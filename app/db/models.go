@@ -15,6 +15,14 @@ type User struct {
 	Whiteboards []Whiteboard `gorm:"many2many:user_whiteboards;"`
 }
 
+type Session struct {
+	ID             uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	SecretHash     string
+	UserId         uuid.UUID
+	CreatedAt      time.Time `gorm:"autoCreateTime"`
+	LastVerifiedAt time.Time
+}
+
 type UserData struct {
 	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
 	UserID    uuid.UUID `gorm:"type:uuid;not null;uniqueIndex"`

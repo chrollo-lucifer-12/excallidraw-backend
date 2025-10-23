@@ -12,6 +12,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const alphabet = "abcdefghijkmnpqrstuvwxyz23456789"
+
 func BindJSON[T any](c *gin.Context) (*T, error) {
 	var req T
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -90,4 +92,18 @@ func GenerateRandomSlug(n int) (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(bytes), nil
+}
+
+func GenerateSecureRandomString() (string, error) {
+	bytes := make([]byte, 24)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		return "", err
+	}
+	id := make([]byte, len(bytes))
+	for i, b := range bytes {
+		id[i] = alphabet[b>>3]
+	}
+
+	return string(id), nil
 }
