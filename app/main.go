@@ -7,6 +7,7 @@ import (
 	"github.com/chrollo-lucifer-12/excallidraw-backend/app/dotenv"
 	fileupload "github.com/chrollo-lucifer-12/excallidraw-backend/app/filleupload"
 	"github.com/chrollo-lucifer-12/excallidraw-backend/app/server"
+	"github.com/chrollo-lucifer-12/excallidraw-backend/app/ws"
 )
 
 func main() {
@@ -29,10 +30,12 @@ func main() {
 	if err != nil {
 		fmt.Println("error loading minio", err)
 	}
+	rm := ws.NewRoomManager()
 	serverOpts := server.ServerOpts{
 		Env:          env,
 		Database:     database,
 		UploadClient: minio,
+		Ws:           rm,
 	}
 	server := server.NewServer(serverOpts)
 	server.Start()
