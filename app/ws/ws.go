@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -8,6 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
+
+type Message struct {
+	Type    string `json:"type"`
+	Payload any    `json:"payload"`
+}
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -19,13 +25,20 @@ type WsOpts struct {
 	database *db.DB
 }
 
+type Client struct {
+	conn   *websocket.Conn
+	userId string
+}
+
 type WebSocketManager struct {
 	database *db.DB
+	rooms    map[string][]*Client
 }
 
 func NewWs(database *db.DB) *WebSocketManager {
 	return &WebSocketManager{
 		database: database,
+		rooms:    make(map[string][]*Client),
 	}
 }
 
@@ -40,18 +53,62 @@ func (ws *WebSocketManager) WsHandler(c *gin.Context) {
 
 func (ws *WebSocketManager) handleConnection(conn *websocket.Conn) {
 	defer conn.Close()
+	var client *Client
 	for {
-		_, message, err := conn.ReadMessage()
+		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			fmt.Println("Error reading message:", err)
 			break
 		}
 
-		fmt.Printf("Received: %s\n", message)
+		var message Message
+		if err := json.Unmarshal(msg, &message); err != nil {
+			fmt.Println("JSON parse error:", err)
+			continue
+		}
 
-		if err := conn.WriteMessage(websocket.TextMessage, message); err != nil {
-			fmt.Println("Error writing message:", err)
-			break
+		switch message.Type {
+		case "join":
+			data, _ := json.Marshal(message.Payload)
+			var joinData struct {
+				RoomId string `json:"roomId"`
+				UserId string `json:"userId"`
+			}
+			if err := json.Unmarshal(data, &joinData); err != nil {
+				fmt.Println("Invalid join payload:", err)
+				continue
+			}
+
+			client = &Client{
+				conn:   conn,
+				userId: joinData.UserId,
+			}
+
+			ws.rooms[joinData.RoomId] = append(ws.rooms[joinData.RoomId], client)
+			ws.broadcastToRoom(joinData.RoomId, Message{
+				Type:    "user_joined",
+				Payload: joinData.UserId,
+			})
+			fmt.Printf("User %s joined room %s\n", joinData.UserId, joinData.RoomId)
+		}
+	}
+}
+
+func (ws *WebSocketManager) broadcastToRoom(roomId string, message Message) {
+	clients, ok := ws.rooms[roomId]
+	if !ok {
+		return
+	}
+
+	data, err := json.Marshal(message)
+	if err != nil {
+		fmt.Println("Error marshalling message:", err)
+		return
+	}
+
+	for _, client := range clients {
+		if err := client.conn.WriteMessage(websocket.TextMessage, data); err != nil {
+			fmt.Println("Error writing to client:", err)
 		}
 	}
 }
