@@ -8,16 +8,15 @@ import (
 	"github.com/chrollo-lucifer-12/excallidraw-backend/app/db"
 	"github.com/chrollo-lucifer-12/excallidraw-backend/app/dotenv"
 	fileupload "github.com/chrollo-lucifer-12/excallidraw-backend/app/filleupload"
-	"github.com/chrollo-lucifer-12/excallidraw-backend/app/ws"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 type ServerOpts struct {
-	Env          *dotenv.Env
-	Database     *db.DB
-	UploadClient *fileupload.UploadService
-	Ws           *ws.RoomManager
+	Env              *dotenv.Env
+	Database         *db.DB
+	UploadClient     *fileupload.UploadService
+	WebSocketHandler func(*gin.Context)
 }
 
 type Server struct {
@@ -25,7 +24,7 @@ type Server struct {
 	db           *db.DB
 	router       *gin.Engine
 	uploadClient *fileupload.UploadService
-	ws           *ws.RoomManager
+	wsHandler    func(*gin.Context)
 }
 
 func NewServer(opts ServerOpts) *Server {
@@ -33,7 +32,7 @@ func NewServer(opts ServerOpts) *Server {
 		env:          opts.Env,
 		db:           opts.Database,
 		uploadClient: opts.UploadClient,
-		ws:           opts.Ws,
+		wsHandler:    opts.WebSocketHandler,
 	}
 	server.router = gin.Default()
 	return server
@@ -49,15 +48,13 @@ func (s *Server) Start() {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
-
+	s.router.GET("/ws", s.wsHandler)
 	s.RegisterRoutes(s.router)
 	port := "8080"
 	if s.env.PORT != "" {
 		port = s.env.PORT
 	}
-	s.router.GET("/ws", func(c *gin.Context) {
-		s.ws.HandleRequest(c.Writer, c.Request)
-	})
+
 	addr := fmt.Sprintf(":%s", port)
 	log.Printf("🚀 Server running on %s", addr)
 	if err := s.router.Run(addr); err != nil {

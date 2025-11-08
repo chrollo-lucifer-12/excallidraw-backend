@@ -30,12 +30,12 @@ func main() {
 	if err != nil {
 		fmt.Println("error loading minio", err)
 	}
-	rm := ws.NewRoomManager()
+	w := ws.NewWs(database)
 	serverOpts := server.ServerOpts{
-		Env:          env,
-		Database:     database,
-		UploadClient: minio,
-		Ws:           rm,
+		Env:              env,
+		Database:         database,
+		UploadClient:     minio,
+		WebSocketHandler: w.WsHandler,
 	}
 	server := server.NewServer(serverOpts)
 	server.Start()

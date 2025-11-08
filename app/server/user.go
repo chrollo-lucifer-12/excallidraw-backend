@@ -164,7 +164,7 @@ func (s *Server) getUserProfileHandler(c *gin.Context) {
 		//	panic(err)
 	}
 
-	c.JSON(http.StatusFound, gin.H{"message": "Profile found", "user": userProfile})
+	c.JSON(200, gin.H{"message": "Profile found", "user": userProfile})
 }
 
 func (s *Server) uploadAvatarHandler(c *gin.Context) {
